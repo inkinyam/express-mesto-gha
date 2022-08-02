@@ -1,0 +1,32 @@
+.popup__item{
+  border: 1px solid #fff;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+  width: 358px;
+  height: 27px;
+  margin: 0 auto;
+  padding: 0;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: normal;
+  line-height: 17px;
+  color: #000;
+}
+
+.popup__item:first-of-type {
+  margin: 54px auto 0;
+}
+
+.popup__item:focus {
+  border-top: 2px solid rgba(145, 151, 153, 0.3);
+  border-left: 2px solid rgba(145, 151, 153, 0.3);
+  border-right: 2px solid rgba(145, 151, 153, 0.3);
+  outline: none;
+}
+
+@media screen and (max-width: 550px) {
+  .popup__item{
+    width: 238px;
+    height: 27px;
+    margin: 0 auto 25px;
+  }
+}

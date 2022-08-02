@@ -1,0 +1,26 @@
+
+.login__input {
+  background-color: transparent;
+  outline: none;
+  border: none;
+  border-bottom: 1px solid #CCCCCC;
+  width: 358px;
+  box-sizing: border-box;
+  padding: 13px;
+  margin: 0 auto 30px;
+  color: #ccc;
+  opacity: 1;
+  transition: all 0.3s ease;
+}
+
+.login__input::placeholder {
+  color: #CCCCCC;
+}
+
+.login__input:hover  {
+  opacity: 0.85;
+}
+
+.login__input:focus  {
+  border-bottom: 2px solid #6fa7fc;
+}

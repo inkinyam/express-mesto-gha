@@ -1,0 +1,17 @@
+.popup__wrapper {
+  width: 430px;
+
+  background-color: #fff;
+  box-shadow: 0px 0px 25px rgba(0, 0, 0, 0.15);
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+@media screen and (max-width: 550px) {
+  .popup__wrapper{
+    width: 282px;
+    min-height: 322px;
+  }
+}

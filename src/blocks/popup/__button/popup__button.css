@@ -1,0 +1,11 @@
+.popup__button {
+  padding: 0;
+  border: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.popup__button:hover {
+  cursor: pointer;
+}

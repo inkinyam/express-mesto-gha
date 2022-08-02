@@ -1,0 +1,6 @@
+.profile__loader {
+  grid-area: avatar;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  }
