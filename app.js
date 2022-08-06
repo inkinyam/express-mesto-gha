@@ -1,19 +1,28 @@
-require('dotenv').config();
-
+const express = require('express');
 const mongoose = require('mongoose');
+const bodyParser = require('body-parser');
 
 const { PORT = 3000 } = process.env;
 
-mongoose.connect('mongodb://localhost:27017/mestodb');
+const DATABASE_URL = 'mongodb://localhost:27017/mestodb';
+mongoose.connect(DATABASE_URL);
 
-const express = require('express');
-const path = require('path');
-
-const PUBLIC_FOLDER = path.join(__dirname, 'public');
 const app = express();
 
-app.use(express.static(PUBLIC_FOLDER));
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 
-app.listen(PORT, () => {
-  console.log(`server listen ${PORT}`);
+app.use((req, res, next) => {
+  req.user = {
+    _id: '62ee5a616a64bb636c22fa59',
+  };
+
+  next();
 });
+
+app.use('/users', require('./routes/users'));
+app.use('/cards', require('./routes/cards'));
+
+app.use((req, res) => res.status(404).send({ message: 'Страница не найдена' }));
+
+app.listen(PORT);
