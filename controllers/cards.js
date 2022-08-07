@@ -39,7 +39,7 @@ const deleteCard = (req, res) => {
       return res.send(card);
     })
     .catch((err) => {
-      if (err.name === 'ValidationError' || err.name === 'CastError') {
+      if (err.name === 'CastError' || err.name === 'ValidationError') {
         return res.status(400).send({ message: 'Вы указали некорректные данные' });
       }
       return res.status(500).send({ message: 'Произошла ошибка' });
@@ -54,10 +54,10 @@ const putLikeOnCard = (req, res) => {
         res.status(404).send({ message: 'Карточка не найдена' });
         return;
       }
-      res.send(card);
+      res.status(200).send(card);
     })
     .catch((err) => {
-      if (err.name === 'ValidationError' || err.name === 'CastError') {
+      if (err.name === 'CastError' || err.name === 'ValidationError') {
         return res.status(400).send({ message: 'Вы указали некорректные данные' });
       }
       return res.status(500).send({ message: 'Произошла ошибка' });
@@ -72,10 +72,10 @@ const removeLikeFromCard = (req, res) => {
         res.status(404).send({ message: 'Карточка не найдена' });
         return;
       }
-      res.send(card);
+      res.status(200).send(card);
     })
     .catch((err) => {
-      if (err.name === 'ValidationError' || err.name === 'CastError') {
+      if (err.name === 'CastError' || err.name === 'ValidationError') {
         return res.status(400).send({ message: 'Вы указали некорректные данные' });
       }
       return res.status(500).send({ message: 'Произошла ошибка' });
