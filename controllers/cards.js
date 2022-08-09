@@ -42,6 +42,9 @@ const deleteCard = (req, res) => {
       if (!card) {
         return res.status(NOT_FOUND).send({ message: 'Карточка не найдена' });
       }
+      if (!card.owner.equals(req.user._id)) {
+        return res.status(SERVER_ERROR).send({ message: 'Невозможно удалить чужую карточку' });
+      }
       return res.send(card);
     })
     .catch((err) => {
