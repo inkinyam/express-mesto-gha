@@ -61,7 +61,7 @@ const putLikeOnCard = (req, res, next) => {
       if (!card) {
         next(new ErrNotFound('Карточка с указанным _id не найдена'));
       }
-      return res.status(CREATED).send(card);
+      return res.status(OK).send(card);
     })
     .catch((err) => {
       if (err.name === 'CastError' || err.name === 'ValidationError') {
