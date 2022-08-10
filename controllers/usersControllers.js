@@ -17,14 +17,19 @@ const addUser = (req, res, next) => {
       name, about, avatar, email, password: hash,
     }))
     .then((user) => {
-      res.status(CREATED).send(user);
+      res.status(CREATED).send({
+        name: user.name,
+        about: user.about,
+        avatar: user.avatar,
+        email: user.email,
+      });
     })
     .catch((err) => {
       if (err.name === 'CastError' || err.name === 'ValidationError') {
         next(new ErrBadRequest({ message: 'Вы указали некорректные данные при создании пользователя' }));
       }
       if (err.code === 11000) {
-        next(new ErrConflict({ message: 'Пользователь с таким email уже существует' }));
+        next(new ErrConflict('Пользователь с таким email уже существует'));
       }
       next(err);
     });
