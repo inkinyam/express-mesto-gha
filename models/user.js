@@ -12,7 +12,7 @@ const userSchema = new Schema(
       required: false,
       minlength: 2,
       maxlength: 30,
-      default: '«Жак-Ив Кусто',
+      default: 'Жак-Ив Кусто',
     },
     about: {
       type: String,
