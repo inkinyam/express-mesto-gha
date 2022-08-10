@@ -1,91 +1,90 @@
 const Card = require('../models/card');
+const { CREATED, OK } = require('../utils/statuses');
+
 const {
-  CREATED,
-  BAD_REQUEST,
-  NOT_FOUND,
-  SERVER_ERROR,
-} = require('../utils/statuses');
+  ErrBadRequest, ErrNotFound, ErrForbidden,
+} = require('../errors/errors');
 
 // создаем новую карточку
-const addCard = (req, res) => {
+const addCard = (req, res, next) => {
   const { name, link, owner = req.user._id } = req.body;
   Card.create({ name, link, owner })
     .then((card) => {
-      res.send(card);
+      res.status(CREATED).send(card);
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        return res.status(BAD_REQUEST).send({ message: 'Вы указали некорректные данные' });
+        next(new ErrBadRequest({ message: 'Вы указали некорректные данные при создании карточки' }));
       }
-      return res.status(SERVER_ERROR).send({ message: 'Произошла ошибка' });
+      next(err);
     });
 };
 
 // получаем все карточки
-const getCards = (req, res) => {
+const getCards = (req, res, next) => {
   Card.find({})
     .then((cards) => {
-      res.send(cards);
+      res.status(OK).send(cards);
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        return res.status(BAD_REQUEST).send({ message: 'Вы указали некорректные данные' });
+        next(new ErrBadRequest({ message: 'Вы указали некорректные данные' }));
       }
-      return res.status(SERVER_ERROR).send({ message: 'Произошла ошибка' });
+      next(err);
     });
 };
 
 // получаем конкретную карточку по id
-const deleteCard = (req, res) => {
+const deleteCard = (req, res, next) => {
   Card.findByIdAndRemove(req.params.cardId)
     .then((card) => {
       if (!card) {
-        return res.status(NOT_FOUND).send({ message: 'Карточка не найдена' });
+        next(new ErrNotFound({ message: 'Карточка с указанным _id не найдена' }));
       }
       if (!card.owner.equals(req.user._id)) {
-        return res.status(SERVER_ERROR).send({ message: 'Невозможно удалить чужую карточку' });
+        next(new ErrForbidden({ message: 'Нельзя удалить карточку, которая была создана не Вами' }));
       }
-      return res.send(card);
+      return res.status(OK).send(card);
     })
     .catch((err) => {
       if (err.name === 'CastError' || err.name === 'ValidationError') {
-        return res.status(BAD_REQUEST).send({ message: 'Вы указали некорректные данные' });
+        next(new ErrBadRequest({ message: 'Вы указали некорректные данные карточки' }));
       }
-      return res.status(SERVER_ERROR).send({ message: 'Произошла ошибка' });
+      next(err);
     });
 };
 
 // ставим лайк на карточку
-const putLikeOnCard = (req, res) => {
+const putLikeOnCard = (req, res, next) => {
   Card.findByIdAndUpdate(req.params.cardId, { $addToSet: { likes: req.user._id } }, { new: true })
     .then((card) => {
       if (!card) {
-        return res.status(NOT_FOUND).send({ message: 'Карточка не найдена' });
+        next(new ErrNotFound({ message: 'Карточка с указанным _id не найдена' }));
       }
       return res.status(CREATED).send(card);
     })
     .catch((err) => {
       if (err.name === 'CastError' || err.name === 'ValidationError') {
-        return res.status(BAD_REQUEST).send({ message: 'Вы указали некорректные данные' });
+        next(new ErrBadRequest({ message: 'Вы указали некорректные данные карточки' }));
       }
-      return res.status(SERVER_ERROR).send({ message: 'Произошла ошибка' });
+      next(err);
     });
 };
 
 // убираем лайк с карточки
-const removeLikeFromCard = (req, res) => {
+const removeLikeFromCard = (req, res, next) => {
   Card.findByIdAndUpdate(req.params.cardId, { $pull: { likes: req.user._id } }, { new: true })
     .then((card) => {
       if (!card) {
-        return res.status(NOT_FOUND).send({ message: 'Карточка не найдена' });
+        next(new ErrNotFound({ message: 'Карточка с указанным _id не найдена' }));
       }
-      return res.send(card);
+      return res.status(OK).send(card);
     })
     .catch((err) => {
       if (err.name === 'CastError' || err.name === 'ValidationError') {
-        return res.status(BAD_REQUEST).send({ message: 'Вы указали некорректные данные' });
+        next(new ErrBadRequest({ message: 'Вы указали некорректные данные карточки' }));
       }
-      return res.status(SERVER_ERROR).send({ message: 'Произошла ошибка' });
+      next(err);
     });
 };
 
