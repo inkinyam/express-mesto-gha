@@ -31,34 +31,28 @@ const getCards = (req, res, next) => {
 };
 
 // получаем конкретную карточку по id
-async function deleteCard(req, res, next) {
-  try {
-    const card = await Card.findById(req.user._id).populate('owner');
-
-    if (!card) {
+const deleteCard = (req, res, next) => {
+  Card.findByIdAndRemove(req.params.cardId)
+    .orFail(() => {
       throw new ErrNotFound('Карточка с указанным _id не найдена');
-    }
-
-    if (card.owner.id !== req.user._id) {
-      throw new ErrForbidden('Нельзя удалить карточку, которая была создана не Вами');
-    }
-    await Card.findByIdAndRemove(req.params);
-
-    res.status(OK).send(card);
-  } catch (err) {
-    next(err);
-  }
-}
+    })
+    .then((card) => {
+      if (!card.owner.equals(req.user._id)) {
+        return next(new ErrForbidden('Нельзя удалить карточку, которая была создана не Вами'));
+      }
+      return res.status(OK).send(card);
+    })
+    .catch(next);
+};
 
 // ставим лайк на карточку
 const putLikeOnCard = (req, res, next) => {
   Card.findByIdAndUpdate(req.params.cardId, { $addToSet: { likes: req.user._id } }, { new: true })
     .then((card) => {
       if (!card) {
-        next(new ErrNotFound('Карточка с указанным _id не найдена'));
-        return;
+        return next(new ErrNotFound('Карточка с указанным _id не найдена'));
       }
-      res.status(OK).send(card);
+      return res.status(OK).send(card);
     })
     .catch((err) => {
       if (err.name === 'CastError' || err.name === 'ValidationError') {
