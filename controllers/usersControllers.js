@@ -62,8 +62,7 @@ const login = (req, res, next) => {
 
 // получаем свои данные
 const getMe = (req, res, next) => {
-  const id = req.user._id;
-  User.findById(id)
+  User.findById(req.user._id)
     .then((user) => {
       if (!user) {
         next(new ErrNotFound('Пользователь с указанным _id не найден'));

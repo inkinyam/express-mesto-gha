@@ -1,15 +1,15 @@
 const express = require('express');
 const mongoose = require('mongoose');
-// const helmet = require('helmet');
+const helmet = require('helmet');
 const { errors } = require('celebrate');
 const bodyParser = require('body-parser');
-const cookieParser = require('cookie-parser');
 const rateLimit = require('express-rate-limit');
 
 const { celebrate, Joi } = require('celebrate');
 
 const auth = require('./middlewares/auth');
 const handleErrors = require('./middlewares/handleErrors');
+const { ErrNotFound } = require('./errors/errors');
 
 const {
   addUser,
@@ -28,11 +28,10 @@ const limiter = rateLimit({
   max: 1000, // можно совершить максимум 1000 запросов с одного IP
 });
 
-/* app.use(helmet()); */
+app.use(helmet());
 app.use(limiter); // защита от ддос атак
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(cookieParser()); // парсер куки
 
 // роут для регистрации
 app.post('/signup', celebrate({
@@ -62,6 +61,13 @@ app.use('/cards', require('./routes/cardsRoutes'));
 
 // обработчики ошибок
 app.use(errors());
+
+app.use((req, res, next) => {
+  next(new ErrNotFound('Путь не найден'));
+});
+
 app.use(handleErrors);
 
-app.listen(PORT);
+app.listen(PORT, () => {
+  console.log(`Приложение запущено на ${PORT}`);
+});
