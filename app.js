@@ -1,17 +1,20 @@
 const express = require('express');
 const mongoose = require('mongoose');
+// const helmet = require('helmet');
+const { errors } = require('celebrate');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
-const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
+
 const { celebrate, Joi } = require('celebrate');
 
 const auth = require('./middlewares/auth');
+const handleErrors = require('./middlewares/handleErrors');
 
 const {
   addUser,
   login,
-} = require('./controllers/users');
+} = require('./controllers/usersControllers');
 
 const { PORT = 3000 } = process.env;
 
@@ -25,28 +28,40 @@ const limiter = rateLimit({
   max: 1000, // можно совершить максимум 1000 запросов с одного IP
 });
 
-app.use(limiter);
-app.use(helmet());
+/* app.use(helmet()); */
+app.use(limiter); // защита от ддос атак
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(cookieParser());
+app.use(cookieParser()); // парсер куки
 
+// роут для регистрации
 app.post('/signup', celebrate({
   body: Joi.object().keys({
     name: Joi.string().min(2).max(30),
     about: Joi.string().min(2).max(30),
-    avatar: Joi.string().regex(/https?:\/\/(www)?[0-9a-z\-._~:/?#[\]@!$&'()*+,;=]+#?$/i),
+    avatar: Joi.string().pattern(/https?:\/\/(www)?[0-9a-z\-._~:/?#[\]@!$&'()*+,;=]+#?$/i),
     email: Joi.string().email().required(),
-    password: Joi.string(),
+    password: Joi.string().required(),
   }),
 }), addUser);
-app.post('/signin', login);
 
+// роут для логина пользователя
+app.post('/signin', celebrate({
+  body: Joi.object().keys({
+    email: Joi.string().email().required(),
+    password: Joi.string().required(),
+  }),
+}), login);
+
+// защита роутов для неавторизированных пользователей
 app.use(auth);
 
-app.use('/users', require('./routes/users'));
-app.use('/cards', require('./routes/cards'));
+// остальные роуты
+app.use('/users', require('./routes/usersRoutes'));
+app.use('/cards', require('./routes/cardsRoutes'));
 
-app.use((req, res) => res.status(404).send({ message: 'Страница не найдена' }));
+// обработчики ошибок
+app.use(errors());
+app.use(handleErrors);
 
 app.listen(PORT);

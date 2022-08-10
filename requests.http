@@ -1,9 +1,9 @@
 ###
 
-POST http://localhost:3000/users/
+POST http://localhost:3000/login
 content-type: application/json
 
 {
-  "email": "email2@email.ru",
-  "password": "passworddd"
- }
+    "email": "email@email.ru",
+    "password": "password"
+}

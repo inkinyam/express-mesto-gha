@@ -1,10 +1,5 @@
 const jwt = require('jsonwebtoken');
-
-const handleAuthError = (res) => {
-  res
-    .status(401)
-    .send({ message: 'Вам нужно авторизироваться' });
-};
+const { ErrAutorization } = require('../errors/errors');
 
 const extractBearerToken = (header) => {
   const token = header.replace('Bearer ', '');
@@ -13,18 +8,17 @@ const extractBearerToken = (header) => {
 
 module.exports = (req, res, next) => {
   const { authorization } = req.headers;
-
   if (!authorization || !authorization.startsWith('Bearer ')) {
-    return handleAuthError(res);
+    throw new ErrAutorization('Вам нужно авторизироваться');
   }
 
   const token = extractBearerToken(authorization);
   let payload;
 
   try {
-    payload = jwt.verify(token, '431749cfb4647c86ce6c1fa854f875e348380e92bff313b1b27508d300586304');
+    payload = jwt.verify(token, 'secret');
   } catch (err) {
-    return handleAuthError(res);
+    throw new ErrAutorization('Вам нужно авторизироваться');
   }
 
   req.user = payload; // записываем пейлоуд в объект запроса

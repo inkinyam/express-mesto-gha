@@ -2,57 +2,61 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 const {
+  ErrBadRequest, ErrConflict,
+} = require('../errors/errors');
+
+const {
   BAD_REQUEST,
   NOT_FOUND,
   SERVER_ERROR,
 } = require('../utils/statuses');
 
 // создаем нового пользователя
-const addUser = (req, res) => {
+const addUser = (req, res, next) => {
   const {
-    name, about, avatar, email,
+    name, about, avatar, email, password,
   } = req.body;
 
-  bcrypt.hash(req.body.password, 10)
+  bcrypt.hash(password, 10)
     .then((hash) => User.create({
       name, about, avatar, email, password: hash,
     }))
     .then((user) => {
-      res.send(user);
+      res.status(200).send(user);
     })
     .catch((err) => {
-      if (err.name === 'ValidationError') {
-        return res.status(BAD_REQUEST).send({ message: 'Вы указали некорректные данные' });
+      if (err.name === 'CastError' || err.name === 'ValidationError') {
+        next(new ErrBadRequest('Вы указали некорректные данные при создании пользователя'));
       }
-      return res.status(SERVER_ERROR).send({ message: 'Произошла ошибка' });
+      if (err.code === 11000) {
+        next(new ErrConflict('Пользователь с таким email уже существует'));
+      }
+      next(err);
     });
 };
 
-// получаем всех пользователей
-const getUsers = (req, res) => {
+const getUsers = (req, res, next) => {
   User.find({})
     .then((users) => {
       res.send(users);
     })
-    .catch(() => {
-      res.status(SERVER_ERROR).send({ message: 'Произошла ошибка' });
+    .catch((err) => {
+      next(err);
     });
 };
 
 // логинимся и получаем токен
-const login = (req, res) => {
+const login = (req, res, next) => {
   const {
     email, password,
   } = req.body;
 
   return User.findUserByCredentials(email, password)
     .then((user) => {
-      const token = jwt.sign({ _id: user._id }, '431749cfb4647c86ce6c1fa854f875e348380e92bff313b1b27508d300586304', { expiresIn: '7d' });
-      res.cookie('jwt', token, { maxAge: 3600000 * 24 * 7, httpOnly: true, sameSite: true }).end(); // сохранили в кукисах токен
+      const token = jwt.sign({ _id: user._id }, 'secret', { expiresIn: '7d' });
+      res.send({ jwt: token });
     })
-    .catch((err) => {
-      res.status(401).send({ message: err.message });
-    });
+    .catch(next);
 };
 
 // получаем свои данные
