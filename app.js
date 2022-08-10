@@ -59,12 +59,12 @@ app.use(auth);
 app.use('/users', require('./routes/usersRoutes'));
 app.use('/cards', require('./routes/cardsRoutes'));
 
-// обработчики ошибок
-app.use(errors());
-
 app.use((req, res, next) => {
   next(new ErrNotFound('Путь не найден'));
 });
+
+// обработчики ошибок
+app.use(errors());
 
 app.use(handleErrors);
 

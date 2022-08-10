@@ -27,10 +27,10 @@ const addUser = (req, res, next) => {
     })
     .catch((err) => {
       if (err.name === 'CastError' || err.name === 'ValidationError') {
-        next(new ErrBadRequest({ message: 'Вы указали некорректные данные при создании пользователя' }));
+        throw new ErrBadRequest({ message: 'Вы указали некорректные данные при создании пользователя' });
       }
       if (err.code === 11000) {
-        next(new ErrConflict('Пользователь с таким email уже существует'));
+        throw new ErrConflict('Пользователь с таким email уже существует');
       }
       next(err);
     });
@@ -65,7 +65,7 @@ const getMe = (req, res, next) => {
   User.findById(req.user._id)
     .then((user) => {
       if (!user) {
-        next(new ErrNotFound('Пользователь с указанным _id не найден'));
+        throw new ErrNotFound('Пользователь с указанным _id не найден');
       }
       return res.status(OK).send(user);
     })
@@ -77,13 +77,13 @@ const getUserById = (req, res, next) => {
   User.findById(req.params.userId)
     .then((user) => {
       if (!user) {
-        next(new ErrNotFound('Пользователь с указанным _id не найден'));
+        throw new ErrNotFound('Пользователь с указанным _id не найден');
       }
       return res.status(OK).send({ user });
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        next(new ErrBadRequest('Вы указали некорректные данные'));
+        throw new ErrBadRequest('Вы указали некорректные данные');
       }
       next(err);
     });
@@ -95,13 +95,13 @@ const updateUser = (req, res, next) => {
   User.findByIdAndUpdate(req.user._id, { name, about }, { new: true, runValidators: true })
     .then((user) => {
       if (!user) {
-        next(new ErrNotFound('Пользователь с указанным _id не найден'));
+        throw new ErrNotFound('Пользователь с указанным _id не найден');
       }
       return res.status(OK).send({ user });
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        next(new ErrBadRequest('Вы указали некорректные данные при обновлении данных пользователя'));
+        throw new ErrBadRequest('Вы указали некорректные данные при обновлении данных пользователя');
       }
       next(err);
     });
@@ -112,13 +112,13 @@ const updateAvatar = (req, res, next) => {
   User.findByIdAndUpdate(req.user._id, { avatar }, { new: true, runValidators: true })
     .then((user) => {
       if (!user) {
-        next(new ErrNotFound('Пользователь с указанным _id не найден'));
+        throw new ErrNotFound('Пользователь с указанным _id не найден');
       }
       return res.status(OK).send(user);
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        next(new ErrBadRequest('Вы указали некорректные данные при обновлении аватара'));
+        throw new ErrBadRequest('Вы указали некорректные данные при обновлении аватара');
       }
       next(err);
     });

@@ -14,7 +14,7 @@ const addCard = (req, res, next) => {
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        next(new ErrBadRequest('Вы указали некорректные данные при создании карточки'));
+        throw new ErrBadRequest('Вы указали некорректные данные при создании карточки');
       }
       next(err);
     });
@@ -26,46 +26,41 @@ const getCards = (req, res, next) => {
     .then((cards) => {
       res.status(OK).send(cards);
     })
-    .catch((err) => {
-      if (err.name === 'CastError') {
-        next(new ErrBadRequest('Вы указали некорректные данные'));
-      }
-      next(err);
-    });
+    .catch(next);
 };
 
 // получаем конкретную карточку по id
-const deleteCard = (req, res, next) => {
-  Card.findByIdAndRemove(req.params.cardId)
-    .then((card) => {
-      if (!card) {
-        next(new ErrNotFound('Карточка с указанным _id не найдена'));
-      }
-      if (!card.owner.equals(req.user._id)) {
-        next(new ErrForbidden('Нельзя удалить карточку, которая была создана не Вами'));
-      }
-      return res.status(OK).send(card);
-    })
-    .catch((err) => {
-      if (err.name === 'CastError' || err.name === 'ValidationError') {
-        next(new ErrBadRequest('Вы указали некорректные данные карточки'));
-      }
-      next(err);
-    });
-};
+async function deleteCard(req, res, next) {
+  try {
+    const card = await Card.findById(req.user._id).populate('owner');
+
+    if (!card) {
+      throw new ErrNotFound('Карточка с указанным _id не найдена');
+    }
+
+    if (card.owner.id !== req.user._id) {
+      throw new ErrForbidden('Нельзя удалить карточку, которая была создана не Вами');
+    }
+    await Card.findByIdAndRemove(req.params);
+
+    res.status(OK).send(card);
+  } catch (err) {
+    next(err);
+  }
+}
 
 // ставим лайк на карточку
 const putLikeOnCard = (req, res, next) => {
   Card.findByIdAndUpdate(req.params.cardId, { $addToSet: { likes: req.user._id } }, { new: true })
     .then((card) => {
       if (!card) {
-        next(new ErrNotFound('Карточка с указанным _id не найдена'));
+        throw new ErrNotFound('Карточка с указанным _id не найдена');
       }
       return res.status(OK).send(card);
     })
     .catch((err) => {
       if (err.name === 'CastError' || err.name === 'ValidationError') {
-        next(new ErrBadRequest('Вы указали некорректные данные карточки'));
+        throw new ErrBadRequest('Вы указали некорректные данные карточки');
       }
       next(err);
     });
@@ -82,7 +77,7 @@ const removeLikeFromCard = (req, res, next) => {
     })
     .catch((err) => {
       if (err.name === 'CastError' || err.name === 'ValidationError') {
-        next(new ErrBadRequest('Вы указали некорректные данные карточки'));
+        throw new ErrBadRequest('Вы указали некорректные данные карточки');
       }
       next(err);
     });
