@@ -32,7 +32,7 @@ const getCards = (req, res, next) => {
 
 // получаем конкретную карточку по id
 const deleteCard = (req, res, next) => {
-  Card.findByIdAndRemove(req.params.cardId)
+  Card.findById(req.params.cardId)
     .orFail(() => {
       throw new ErrNotFound('Карточка с указанным _id не найдена');
     })
@@ -40,7 +40,10 @@ const deleteCard = (req, res, next) => {
       if (!card.owner.equals(req.user._id)) {
         return next(new ErrForbidden('Нельзя удалить карточку, которая была создана не Вами'));
       }
-      return res.status(OK).send(card);
+      return Card.deleteOne(card)
+        .then(() => {
+          res.status(OK).send(card);
+        });
     })
     .catch(next);
 };
