@@ -1,9 +1,12 @@
 ###
 
-POST http://localhost:3000/login
+POST  http://localhost:3000/signup
 content-type: application/json
 
 {
-    "email": "email@email.ru",
-    "password": "password"
+    "name": "sss",
+    "about": "asasa",
+    "avatar": "https://avatars.mds.yandex.net/i?id=1539ba31f73b4f496a1e762eb167a252-4034499-images-thumbs&n=13",
+    "email": "maiasl@mailmds.ru",
+    "password": "passwosdsdsrd"
 }

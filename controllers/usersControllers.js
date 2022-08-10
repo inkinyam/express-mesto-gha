@@ -22,6 +22,7 @@ const addUser = (req, res, next) => {
         about: user.about,
         avatar: user.avatar,
         email: user.email,
+        _id: user._id,
       });
     })
     .catch((err) => {
@@ -65,7 +66,7 @@ const getMe = (req, res, next) => {
   User.findById(id)
     .then((user) => {
       if (!user) {
-        next(new ErrNotFound({ message: 'Пользователь с указанным _id не найден' }));
+        next(new ErrNotFound('Пользователь с указанным _id не найден'));
       }
       return res.status(OK).send(user);
     })
@@ -77,13 +78,13 @@ const getUserById = (req, res, next) => {
   User.findById(req.params.userId)
     .then((user) => {
       if (!user) {
-        next(new ErrNotFound({ message: 'Пользователь с указанным _id не найден' }));
+        next(new ErrNotFound('Пользователь с указанным _id не найден'));
       }
       return res.status(OK).send({ user });
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        next(new ErrBadRequest({ message: 'Вы указали некорректные данные' }));
+        next(new ErrBadRequest('Вы указали некорректные данные'));
       }
       next(err);
     });
@@ -95,13 +96,13 @@ const updateUser = (req, res, next) => {
   User.findByIdAndUpdate(req.user._id, { name, about }, { new: true, runValidators: true })
     .then((user) => {
       if (!user) {
-        next(new ErrNotFound({ message: 'Пользователь с указанным _id не найден' }));
+        next(new ErrNotFound('Пользователь с указанным _id не найден'));
       }
       return res.status(OK).send({ user });
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        next(new ErrBadRequest({ message: 'Вы указали некорректные данные при обновлении данных пользователя' }));
+        next(new ErrBadRequest('Вы указали некорректные данные при обновлении данных пользователя'));
       }
       next(err);
     });
@@ -112,13 +113,13 @@ const updateAvatar = (req, res, next) => {
   User.findByIdAndUpdate(req.user._id, { avatar }, { new: true, runValidators: true })
     .then((user) => {
       if (!user) {
-        next(new ErrNotFound({ message: 'Пользователь с указанным _id не найден' }));
+        next(new ErrNotFound('Пользователь с указанным _id не найден'));
       }
       return res.status(OK).send(user);
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        next(new ErrBadRequest({ message: 'Вы указали некорректные данные при обновлении аватара' }));
+        next(new ErrBadRequest('Вы указали некорректные данные при обновлении аватара'));
       }
       next(err);
     });
