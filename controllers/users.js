@@ -48,7 +48,7 @@ const login = (req, res) => {
   return User.findUserByCredentials(email, password)
     .then((user) => {
       const token = jwt.sign({ _id: user._id }, '431749cfb4647c86ce6c1fa854f875e348380e92bff313b1b27508d300586304', { expiresIn: '7d' });
-      res.cookie('jwt', token, { maxAge: 3600000 * 24 * 7, httpOnly: true }).end(); // сохранили в кукисах токен
+      res.cookie('jwt', token, { maxAge: 3600000 * 24 * 7, httpOnly: true, sameSite: true }).end(); // сохранили в кукисах токен
     })
     .catch((err) => {
       res.status(401).send({ message: err.message });
