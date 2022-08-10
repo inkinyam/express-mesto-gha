@@ -14,7 +14,8 @@ const addCard = (req, res, next) => {
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        throw new ErrBadRequest('Вы указали некорректные данные при создании карточки');
+        next(new ErrBadRequest('Вы указали некорректные данные при создании карточки'));
+        return;
       }
       next(err);
     });
@@ -54,13 +55,15 @@ const putLikeOnCard = (req, res, next) => {
   Card.findByIdAndUpdate(req.params.cardId, { $addToSet: { likes: req.user._id } }, { new: true })
     .then((card) => {
       if (!card) {
-        throw new ErrNotFound('Карточка с указанным _id не найдена');
+        next(new ErrNotFound('Карточка с указанным _id не найдена'));
+        return;
       }
-      return res.status(OK).send(card);
+      res.status(OK).send(card);
     })
     .catch((err) => {
       if (err.name === 'CastError' || err.name === 'ValidationError') {
-        throw new ErrBadRequest('Вы указали некорректные данные карточки');
+        next(new ErrBadRequest('Вы указали некорректные данные карточки'));
+        return;
       }
       next(err);
     });
@@ -77,7 +80,8 @@ const removeLikeFromCard = (req, res, next) => {
     })
     .catch((err) => {
       if (err.name === 'CastError' || err.name === 'ValidationError') {
-        throw new ErrBadRequest('Вы указали некорректные данные карточки');
+        next(new ErrBadRequest('Вы указали некорректные данные карточки'));
+        return;
       }
       next(err);
     });
